@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator QR Code Google Maps</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- QRCode.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-slate-100 min-h-full flex flex-col text-slate-800">
+
+    <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-blue-600 text-white p-2.5 rounded-xl shadow-lg shadow-blue-500/30">
+                    <i class="fa-solid fa-map-location-dot text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-slate-900 leading-tight">MapQR Generator</h1>
+                    <p class="text-xs text-slate-500">Buat QR Code Lokasi Google Maps untuk GitHub Pages</p>
+                </div>
+            </div>
+            <div>
+                <a href="https://github.com" target="_blank" class="inline-flex items-center space-x-2 bg-slate-900 hover:bg-slate-800 text-white text-sm px-4 py-2 rounded-xl transition shadow-sm">
+                    <i class="fa-brands fa-github text-base"></i>
+                    <span class="hidden sm:inline">Panduan GitHub</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-6xl mx-auto w-full px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Left Column: Input Form & Settings -->
+        <div class="lg:col-span-7 bg-white rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-100 p-6 sm:p-8">
+            <div class="mb-6">
+                <h2 class="text-xl font-bold text-slate-900 flex items-center">
+                    <i class="fa-solid fa-sliders text-blue-600 mr-2.5"></i> Masukkan Detail Lokasi
+                </h2>
+                <p class="text-sm text-slate-500 mt-1">Pilih metode input untuk tautan peta yang ingin diubah menjadi QR Code.</p>
+            </div>
+
+            <!-- Tab Navigation for Input Modes -->
+            <div class="flex border-b border-slate-200 mb-6 space-x-6 text-sm font-medium">
+                <button type="button" onclick="switchTab('url')" id="tab-url" class="pb-3 border-b-2 border-blue-600 text-blue-600 transition flex items-center space-x-2">
+                    <i class="fa-solid fa-link"></i> <span>Link Maps</span>
+                </button>
+                <button type="button" onclick="switchTab('coord')" id="tab-coord" class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition flex items-center space-x-2">
+                    <i class="fa-solid fa-compass"></i> <span>Koordinat (Lat, Lng)</span>
+                </button>
+                <button type="button" onclick="switchTab('query')" id="tab-query" class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition flex items-center space-x-2">
+                    <i class="fa-solid fa-magnifying-glass"></i> <span>Nama Tempat</span>
+                </button>
+            </div>
+
+            <form id="qr-form" onsubmit="event.preventDefault(); generateQR();" class="space-y-6">
+                <!-- Mode: URL -->
+                <div id="section-url" class="input-section space-y-2">
+                    <label class="block text-sm font-semibold text-slate-700">Link Google Maps</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                            <i class="fa-solid fa-globe"></i>
+                        </span>
+                        <input type="url" id="input-url" placeholder="https://maps.app.goo.gl/..." class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition text-sm" value="https://maps.app.goo.gl/">
+                    </div>
+                    <p class="text-xs text-slate-400">Salin link dari tombol 'Bagikan' di aplikasi Google Maps.</p>
+                </div>
+
+                <!-- Mode: Coordinate -->
+                <div id="section-coord" class="input-section space-y-4 hidden">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Latitude (Garis Lintang)</label>
+                            <input type="text" id="input-lat" placeholder="Contoh: -6.2088" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">Longitude (Garis Bujur)</label>
+                            <input type="text" id="input-lng" placeholder="Contoh: 106.8456" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition text-sm">
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-400">Masukkan nilai koordinat desimal dari lokasi tujuan.</p>
+                </div>
+
+                <!-- Mode: Query / Name -->
+                <div id="section-query" class="input-section space-y-2 hidden">
+                    <label class="block text-sm font-semibold text-slate-700">Nama Tempat / Alamat Lengkap</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                            <i class="fa-solid fa-location-dot"></i>
+                        </span>
+                        <input type="text" id="input-query" placeholder="Contoh: Monumen Nasional, Jakarta" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition text-sm">
+                    </div>
+                    <p class="text-xs text-slate-400">Otomatis membuat pencarian arah lokasi di Google Maps.</p>
+                </div>
+
+                <div class="border-t border-slate-100 pt-6 space-y-4">
+                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Kustomisasi Tampilan</h3>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Warna QR Code</label>
+                            <div class="flex items-center space-x-2">
+                                <input type="color" id="color-dark" value="#1e293b" class="w-10 h-10 rounded-lg border border-slate-200 cursor-pointer p-1 bg-white">
+                                <span class="text-xs text-slate-500 font-mono" id="label-color-dark">#1e293b</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Warna Latar Belakang</label>
+                            <div class="flex items-center space-x-2">
+                                <input type="color" id="color-light" value="#ffffff" class="w-10 h-10 rounded-lg border border-slate-200 cursor-pointer p-1 bg-white">
+                                <span class="text-xs text-slate-500 font-mono" id="label-color-light">#ffffff</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Ukuran (Pixel)</label>
+                            <select id="qr-size" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm">
+                                <option value="200">Kecil (200px)</option>
+                                <option value="256" selected>Sedang (256px)</option>
+                                <option value="512">Besar (512px)</option>
+                                <option value="1024">HD (1024px)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex flex-col sm:flex-row gap-3">
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-semibold py-3.5 px-6 rounded-xl transition shadow-lg shadow-blue-600/25 flex items-center justify-center space-x-2 text-sm">
+                        <i class="fa-solid fa-qrcode"></i>
+                        <span>Buat QR Code</span>
+                    </button>
+                    <button type="button" onclick="resetForm()" class="px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition text-sm flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>Reset</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="lg:col-span-5 bg-white rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-100 p-6 sm:p-8 flex flex-col items-center text-center">
+            <h2 class="text-xl font-bold text-slate-900 mb-1 w-full text-left flex items-center">
+                <i class="fa-solid fa-eye text-blue-600 mr-2.5"></i> Hasil Preview QR Code
+            </h2>
+            <p class="text-sm text-slate-500 mb-6 w-full text-left">Scan dengan kamera HP atau unduh gambar untuk dicetak.</p>
+
+            <!-- QR Code Display Box -->
+            <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 flex flex-col items-center justify-center w-full mb-6 relative group">
+                <div id="qrcode" class="p-3 bg-white rounded-xl shadow-sm inline-block min-h-[220px] min-w-[220px] flex items-center justify-center">
+                    <!-- QR Code Generated Here -->
+                </div>
+                <div id="placeholder-text" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-50/90 rounded-2xl text-slate-400">
+                    <i class="fa-solid fa-map-pin text-4xl mb-2 text-slate-300 animate-bounce"></i>
+                    <p class="text-sm font-medium">QR Code akan muncul di sini</p>
+                </div>
+            </div>
+
+            <!-- Result URL Indicator -->
+            <div class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 mb-6 text-left">
+                <span class="text-xs font-semibold text-slate-400 block uppercase tracking-wider mb-1">Target Tautan Saat Ini:</span>
+                <p id="target-url-display" class="text-xs text-slate-600 font-mono truncate">Belum ada tautan dibuat</p>
+            </div>
+
+            <!-- Download Buttons -->
+            <div class="grid grid-cols-2 gap-3 w-full">
+                <button onclick="downloadQR('png')" id="btn-download" disabled class="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-xl transition shadow-md shadow-emerald-600/20 flex items-center justify-center space-x-2 text-sm">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Unduh PNG</span>
+                </button>
+                <button onclick="copyData()" id="btn-copy" disabled class="bg-slate-800 hover:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-xl transition flex items-center justify-center space-x-2 text-sm">
+                    <i class="fa-solid fa-copy"></i>
+                    <span>Salin Link</span>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 mt-auto py-6">
+        <div class="max-w-6xl mx-auto px-4 text-center text-xs text-slate-500 space-y-2">
+            <p>Cara pakai di GitHub Pages: Buat repository baru, upload file ini dengan nama <code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-slate-700">index.html</code>, lalu aktifkan GitHub Pages di pengaturan repository.</p>
+            <p>&copy; 2026 MapQR Generator. Open Source HTML App.</p>
+        </div>
+    </footer>
+
+    <div id="toast" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-xl z-50 flex items-center space-x-3 text-sm">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toast-message">Notifikasi</span>
+    </div>
+
+    <script>
+        let currentActiveTab = 'url';
+        let qrcodeInstance = null;
+        let finalUrl = '';
+
+        // Switch Tab Handler
+        function switchTab(tab) {
+            currentActiveTab = tab;
+            document.querySelectorAll('.input-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`section-${tab}`).classList.remove('hidden');
+
+            // Update tab button styles
+            ['url', 'coord', 'query'].forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === tab) {
+                    btn.className = "pb-3 border-b-2 border-blue-600 text-blue-600 transition flex items-center space-x-2 font-medium";
+                } else {
+                    btn.className = "pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition flex items-center space-x-2 font-medium";
+                }
+            });
+        }
+
+        // Color picker label sync
+        document.getElementById('color-dark').addEventListener('input', (e) => {
+            document.getElementById('label-color-dark').innerText = e.target.value;
+        });
+        document.getElementById('color-light').addEventListener('input', (e) => {
+            document.getElementById('label-color-light').innerText = e.target.value;
+        });
+
+        // Generate QR Function
+        function generateQR() {
+            if (currentActiveTab === 'url') {
+                const url = document.getElementById('input-url').value.trim();
+                if (!url) {
+                    showToast('Harap masukkan Link Google Maps terlebih dahulu!', 'error');
+                    return;
+                }
+                finalUrl = url;
+            } else if (currentActiveTab === 'coord') {
+                const lat = document.getElementById('input-lat').value.trim();
+                const lng = document.getElementById('input-lng').value.trim();
+                if (!lat || !lng) {
+                    showToast('Harap masukkan nilai Latitude dan Longitude!', 'error');
+                    return;
+                }
+                finalUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+            } else if (currentActiveTab === 'query') {
+                const query = document.getElementById('input-query').value.trim();
+                if (!query) {
+                    showToast('Harap masukkan nama tempat atau alamat!', 'error');
+                    return;
+                }
+                finalUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+            }
+
+            // Clear previous QR
+            const container = document.getElementById('qrcode');
+            container.innerHTML = '';
+            document.getElementById('placeholder-text').classList.add('hidden');
+
+            const darkColor = document.getElementById('color-dark').value;
+            const lightColor = document.getElementById('color-light').value;
+            const size = parseInt(document.getElementById('qr-size').value);
+
+            // Render QR Code using qrcode.js
+            try {
+                qrcodeInstance = new QRCode(container, {
+                    text: finalUrl,
+                    width: size,
+                    height: size,
+                    colorDark: darkColor,
+                    colorLight: lightColor,
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+
+                // Update info display & enable buttons
+                document.getElementById('target-url-display').innerText = finalUrl;
+                document.getElementById('btn-download').removeAttribute('disabled');
+                document.getElementById('btn-copy').removeAttribute('disabled');
+                showToast('QR Code berhasil dibuat!', 'success');
+            } catch (err) {
+                showToast('Gagal membuat QR Code. Periksa input Anda.', 'error');
+            }
+        }
+
+        // Reset Form
+        function resetForm() {
+            document.getElementById('qr-form').reset();
+            document.getElementById('qrcode').innerHTML = '';
+            document.getElementById('placeholder-text').classList.remove('hidden');
+            document.getElementById('target-url-display').innerText = 'Belum ada tautan dibuat';
+            document.getElementById('btn-download').setAttribute('disabled', 'true');
+            document.getElementById('btn-copy').setAttribute('disabled', 'true');
+            document.getElementById('label-color-dark').innerText = '#1e293b';
+            document.getElementById('label-color-light').innerText = '#ffffff';
+            showToast('Form berhasil di-reset.', 'success');
+        }
+
+        // Download QR as PNG
+        function downloadQR(type) {
+            const canvas = document.querySelector('#qrcode canvas');
+            if (!canvas) {
+                showToast('Buat QR Code terlebih dahulu!', 'error');
+                return;
+            }
+            const imageURI = canvas.toDataURL("image/png");
+            const link = document.createElement('a');
+            link.href = imageURI;
+            link.download = 'google-maps-qrcode.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('QR Code berhasil diunduh!', 'success');
+        }
+
+        // Copy Data Link
+        function copyData() {
+            if (!finalUrl) return;
+            const dummy = document.createElement('textarea');
+            document.body.appendChild(dummy);
+            dummy.value = finalUrl;
+            document.body.select();
+            document.execCommand('copy');
+            // Alternatively standard clipboard if supported
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(finalUrl);
+            }
+            document.body.removeChild(dummy);
+            showToast('Tautan berhasil disalin ke clipboard!', 'success');
+        }
+
+        // Custom Toast Notification System
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMessage.innerText = message;
+            if (type === 'error') {
+                toastIcon.className = 'fa-solid fa-circle-exclamation text-rose-400';
+            } else {
+                toastIcon.className = 'fa-solid fa-circle-check text-emerald-400';
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // Auto generate initial sample QR on load
+        window.onload = function() {
+            document.getElementById('input-url').value = "https://maps.app.goo.gl/X";
+            // Optional: generateQR();
+        }
+    </script>
+</body>
+</html>
